@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block title %}Panel del Docente - AulaNova{% endblock %}
+
+{% block header_title %}Portal del Docente - I.E. 2060 Virgen de Guadalupe{% endblock %}
+
+{% block extra_style %}
+<style>
+    .welcome-card {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 10px 20px rgba(2, 132, 199, 0.15);
+        margin-bottom: 24px;
+    }
+    .welcome-card h2 { font-size: 22px; margin-bottom: 8px; }
+    .welcome-card p { font-size: 14px; color: #e0f2fe; line-height: 1.5; }
+    .btn-action { background: #0284c7; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; transition: background 0.2s; display: inline-block; margin-right: 4px; }
+    .btn-action:hover { background: #0369a1; }
+    .btn-task { background: #0d9488; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; transition: background 0.2s; display: inline-block; }
+    .btn-task:hover { background: #0f766e; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="welcome-card">
+    <h2>¡Bienvenido, Prof. {{ usuario.nombres }} {{ usuario.apellidos }}!</h2>
+    <p>Desde este espacio institucional puedes consultar tus asignaturas a cargo, registrar calificaciones oficiales y publicar tareas para tus alumnos.</p>
+</div>
+
+<div class="card">
+    <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">📚 Mis Cursos Asignados</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre del Curso</th>
+                <th>Grado Destinado</th>
+                <th>Herramientas Académicas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if cursos %}
+                {% for c in cursos %}
+                <tr>
+                    <td><strong>{{ c.nombre_curso }}</strong></td>
+                    <td>{{ c.grado }}</td>
+                    <td>
+                        <a href="/docente/curso/{{ c.id_curso }}" class="btn-action">📝 Gestionar Notas</a>
+                        <a href="/docente/curso/{{ c.id_curso }}/tareas" class="btn-task">📂 Gestionar Tareas</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3" style="text-align: center; color: #94a3b8; padding: 30px;">No tienes cursos asignados actualmente por la administración.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

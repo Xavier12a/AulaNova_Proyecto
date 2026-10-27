@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+
+{% block title %}Cursos y Tareas - AulaNova{% endblock %}
+
+{% block header_title %}Módulo de Cursos - I.E. 2060 Virgen de Guadalupe{% endblock %}
+
+{% block extra_style %}
+<style>
+    .grid-container { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+    .badge { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .btn-delete { background: #fee2e2; color: #dc2626; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; transition: background 0.2s; }
+    .btn-delete:hover { background: #fecaca; }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; margin-bottom: 6px; color: #475569; font-weight: 600; font-size: 13px; }
+    .info-note { font-size: 12px; color: #64748b; background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 16px; border-left: 3px solid #0284c7; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="grid-container">
+    <!-- Lista de Cursos -->
+    <div class="card">
+        <h3>Lista de Cursos Institucionales</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre del Curso</th>
+                    <th>Grado</th>
+                    <th>Docente a Cargo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if cursos %}
+                    {% for c in cursos %}
+                    <tr>
+                        <td><strong>{{ c.nombre_curso }}</strong></td>
+                        <td>{{ c.grado }}</td>
+                        <td>
+                            {% if c.docente_nombres %}
+                                {{ c.docente_nombres }} {{ c.docente_apellidos }}
+                            {% else %}
+                                <span style="color: #94a3b8; font-style: italic;">Sin asignar</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="/eliminar-curso/{{ c.id_curso }}" class="btn-delete" onclick="return confirm('¿Estás seguro de eliminar este curso?')">🗑️ Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">No hay cursos registrados todavía.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Formulario Registrar Curso -->
+    <div class="card">
+        <h3>Registrar Nuevo Curso</h3>
+        <div class="info-note">
+            ℹ️ Selecciona el grado y asigna un docente obligatorio. El sistema previene duplicados y permite eliminar cursos.
+        </div>
+        <form action="/crear-curso" method="POST">
+            <div class="form-group">
+                <label for="nombre_curso">Nombre del Curso</label>
+                <input type="text" id="nombre_curso" name="nombre_curso" required placeholder="Ej. Matemática">
+            </div>
+            <div class="form-group">
+                <label for="grado">Grado Destinado</label>
+                <select id="grado" name="grado">
+                    <option value="1ro de Secundaria">1ro de Secundaria</option>
+                    <option value="2do de Secundaria">2do de Secundaria</option>
+                    <option value="3ro de Secundaria">3ro de Secundaria</option>
+                    <option value="4to de Secundaria">4to de Secundaria</option>
+                    <option value="5to de Secundaria">5to de Secundaria</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="id_docente">Asignar Docente (Obligatorio)</label>
+                <select id="id_docente" name="id_docente" required>
+                    <option value="" disabled selected>-- Seleccione Docente --</option>
+                    {% for d in docentes %}
+                        <option value="{{ d.id_usuario }}">{{ d.nombres }} {{ d.apellidos }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit">Guardar Curso</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

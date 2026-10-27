@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+
+{% block title %}Gestión de Docentes - AulaNova{% endblock %}
+
+{% block header_title %}Módulo de Docentes - I.E. 2060 Virgen de Guadalupe{% endblock %}
+
+{% block extra_style %}
+<style>
+    .grid-container { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+    .badge { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; margin-bottom: 6px; color: #475569; font-weight: 600; font-size: 13px; }
+    .info-note { font-size: 12px; color: #64748b; background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 16px; border-left: 3px solid #0284c7; }
+    .btn-download { background: #0284c7; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; transition: background 0.2s; display: inline-block; }
+    .btn-download:hover { background: #0369a1; }
+    .file-input { font-size: 12px; padding: 7px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; width: 220px; }
+    .btn-import { background: #0f172a; color: white; padding: 10px 16px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-import:hover { background: #1e293b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="action-bar">
+    <div style="font-weight: 700; color: #0f172a; font-size: 16px;">Acciones Masivas de Docentes</div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+        <a href="/descargar-plantilla-docentes" class="btn-download">📥 Descargar Plantilla CSV</a>
+        
+        <form action="/importar-docentes" method="POST" enctype="multipart/form-data" style="display: flex; gap: 8px; margin: 0;">
+            <input type="file" name="archivo" accept=".csv" required class="file-input">
+            <button type="submit" class="btn-import">📤 Importar Docentes</button>
+        </form>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="card">
+        <h3>Lista de Docentes Registrados</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>DNI</th>
+                    <th>Nombres y Apellidos</th>
+                    <th>Correo Institucional</th>
+                    <th>Rol</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if docentes %}
+                    {% for d in docentes %}
+                    <tr>
+                        <td><strong>{{ d.dni }}</strong></td>
+                        <td>{{ d.nombres }} {{ d.apellidos }}</td>
+                        <td>{{ d.correo }}</td>
+                        <td><span class="badge">Docente</span></td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">No hay docentes registrados todavía.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>Registrar Nuevo Docente</h3>
+        <div class="info-note">
+            ℹ️ El <strong>DNI</strong> ingresado funcionará automáticamente como usuario y contraseña inicial para el docente.
+        </div>
+        <form action="/crear-docente" method="POST">
+            <div class="form-group">
+                <label for="nombres">Nombres</label>
+                <input type="text" id="nombres" name="nombres" required placeholder="Ej. Roberto">
+            </div>
+            <div class="form-group">
+                <label for="apellidos">Apellidos</label>
+                <input type="text" id="apellidos" name="apellidos" required placeholder="Ej. Gómez">
+            </div>
+            <div class="form-group">
+                <label for="dni">DNI del Docente</label>
+                <input type="text" id="dni" name="dni" required maxlength="8" placeholder="Ej. 45829102">
+            </div>
+            <button type="submit">Guardar y Generar Acceso</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends "layout.html" %}
+
+{% block title %}Gestión de Alumnos - AulaNova{% endblock %}
+
+{% block header_title %}Módulo de Alumnos - I.E. 2060 Virgen de Guadalupe{% endblock %}
+
+{% block extra_style %}
+<style>
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+    .grid-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+    }
+    .badge {
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .form-group {
+        margin-bottom: 14px;
+    }
+    label {
+        display: block;
+        margin-bottom: 6px;
+        color: #475569;
+        font-weight: 600;
+        font-size: 13px;
+    }
+    .info-note {
+        font-size: 12px;
+        color: #64748b;
+        background: #f8fafc;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        border-left: 3px solid #0284c7;
+    }
+    .btn-download {
+        background: #0284c7;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+    .btn-download:hover {
+        background: #0369a1;
+    }
+    .file-input {
+        font-size: 12px;
+        padding: 7px;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        width: 220px;
+    }
+    .btn-import {
+        background: #0f172a;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: none;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-import:hover {
+        background: #1e293b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="action-bar">
+    <div style="font-weight: 700; color: #0f172a; font-size: 16px;">Acciones Masivas de Matrícula</div>
+    <div class="action-buttons">
+        <a href="/descargar-plantilla" class="btn-download">📥 Descargar Plantilla CSV</a>
+        
+        <form action="/importar-alumnos" method="POST" enctype="multipart/form-data" style="display: flex; gap: 8px; margin: 0;">
+            <input type="file" name="archivo" accept=".csv" required class="file-input">
+            <button type="submit" class="btn-import">📤 Importar Alumnos</button>
+        </form>
+    </div>
+</div>
+
+<!-- Barra de Filtros y Búsqueda -->
+<div class="action-bar">
+    <form method="GET" action="/alumnos" style="display: flex; gap: 12px; align-items: center; width: 100%; flex-wrap: wrap; margin: 0;">
+        <div style="flex: 1; min-width: 200px;">
+            <input type="text" name="busqueda" value="{{ busqueda }}" placeholder="🔍 Buscar por DNI o Nombre..." style="padding: 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; width: 100%; font-size: 13px; background: #f8fafc;">
+        </div>
+        <div>
+            <select name="grado" style="padding: 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #f8fafc;">
+                <option value="">Todos los Grados</option>
+                <option value="1ro de Secundaria" {% if grado_filtro == '1ro de Secundaria' %}selected{% endif %}>1ro de Secundaria</option>
+                <option value="2do de Secundaria" {% if grado_filtro == '2do de Secundaria' %}selected{% endif %}>2do de Secundaria</option>
+                <option value="3ro de Secundaria" {% if grado_filtro == '3ro de Secundaria' %}selected{% endif %}>3ro de Secundaria</option>
+                <option value="4to de Secundaria" {% if grado_filtro == '4to de Secundaria' %}selected{% endif %}>4to de Secundaria</option>
+                <option value="5to de Secundaria" {% if grado_filtro == '5to de Secundaria' %}selected{% endif %}>5to de Secundaria</option>
+            </select>
+        </div>
+        <div>
+            <select name="seccion" style="padding: 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #f8fafc;">
+                <option value="">Todas las Secciones</option>
+                <option value="A" {% if seccion_filtro == 'A' %}selected{% endif %}>Sección A</option>
+                <option value="B" {% if seccion_filtro == 'B' %}selected{% endif %}>Sección B</option>
+                <option value="C" {% if seccion_filtro == 'C' %}selected{% endif %}>Sección C</option>
+            </select>
+        </div>
+        <div style="display: flex; gap: 6px;">
+            <button type="submit" style="padding: 10px 16px; background: #0284c7; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; width: auto;">Filtrar</button>
+            <a href="/alumnos" style="padding: 10px 16px; background: #64748b; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 13px; display: inline-block; text-align: center;">Limpiar</a>
+        </div>
+    </form>
+</div>
+
+<div class="grid-container">
+    <div class="card">
+        <h3>Lista de Alumnos Matriculados</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>DNI</th>
+                    <th>Nombres y Apellidos</th>
+                    <th>Grado y Sección</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if alumnos %}
+                    {% for a in alumnos %}
+                    <tr>
+                        <td><strong>{{ a.dni }}</strong></td>
+                        <td>{{ a.nombres }} {{ a.apellidos }}</td>
+                        <td>{{ a.grado }} - "{{ a.seccion }}"</td>
+                        <td><span class="badge">Matriculado</span></td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">No se encontraron alumnos con los filtros seleccionados.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>Registrar Nuevo Alumno</h3>
+        <div class="info-note">
+            ℹ️ El <strong>DNI</strong> ingresado funcionará automáticamente como usuario y contraseña inicial para el estudiante.
+        </div>
+        <form action="/crear-alumno" method="POST">
+            <div class="form-group">
+                <label for="nombres">Nombres</label>
+                <input type="text" id="nombres" name="nombres" required placeholder="Ej. Carlos">
+            </div>
+            <div class="form-group">
+                <label for="apellidos">Apellidos</label>
+                <input type="text" id="apellidos" name="apellidos" required placeholder="Ej. Quispe">
+            </div>
+            <div class="form-group">
+                <label for="dni">DNI del Alumno</label>
+                <input type="text" id="dni" name="dni" required maxlength="8" placeholder="Ej. 74839201">
+            </div>
+            <div class="form-group">
+                <label for="grado">Grado</label>
+                <select id="grado" name="grado">
+                    <option value="1ro de Secundaria">1ro de Secundaria</option>
+                    <option value="2do de Secundaria">2do de Secundaria</option>
+                    <option value="3ro de Secundaria">3ro de Secundaria</option>
+                    <option value="4to de Secundaria">4to de Secundaria</option>
+                    <option value="5to de Secundaria">5to de Secundaria</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="seccion">Sección</label>
+                <select id="seccion" name="seccion">
+                    <option value="A">Sección A</option>
+                    <option value="B">Sección B</option>
+                    <option value="C">Sección C</option>
+                </select>
+            </div>
+            <button type="submit">Guardar y Generar Acceso</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

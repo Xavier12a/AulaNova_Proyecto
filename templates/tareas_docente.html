@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+
+{% block title %}Gestión de Tareas - AulaNova{% endblock %}
+
+{% block header_title %}Curso: {{ curso.nombre_curso }} ({{ curso.grado }}) - Tareas{% endblock %}
+
+{% block extra_style %}
+<style>
+    .tarea-card { background: #ffffff; padding: 20px; border-radius: 12px; border: 1.5px solid #e2e8f0; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02); }
+    .tarea-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .tarea-title { font-size: 16px; font-weight: 700; color: #0f172a; }
+    .tarea-date { font-size: 12px; color: #ef4444; font-weight: 600; background: #fee2e2; padding: 4px 8px; border-radius: 6px; }
+    .tarea-body { font-size: 14px; color: #334155; line-height: 1.5; margin-bottom: 12px; }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; margin-bottom: 6px; color: #475569; font-weight: 600; font-size: 13px; }
+    textarea, input[type="text"], input[type="date"], input[type="file"] { width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #f8fafc; }
+    textarea { height: 90px; resize: vertical; }
+    .grid-tareas { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+    .btn-danger { background: #ef4444; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; display: inline-block; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-grades { background: #0284c7; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; display: inline-block; margin-right: 6px; }
+    .btn-grades:hover { background: #0369a1; }
+    .file-badge { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; margin-bottom: 12px; }
+    .file-badge:hover { background: #bae6fd; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 16px;">
+    <a href="/docente/curso/{{ curso.id_curso }}" style="background: #e2e8f0; color: #334155; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600;">⬅️ Volver a Registro de Notas</a>
+</div>
+
+<div class="grid-tareas">
+    <!-- Lista de Tareas Publicadas -->
+    <div>
+        <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px;">📚 Tareas y Prácticas Asignadas</h3>
+        {% if tareas %}
+            {% for t in tareas %}
+            <div class="tarea-card">
+                <div class="tarea-header">
+                    <div class="tarea-title">📝 {{ t.titulo }}</div>
+                    <div class="tarea-date">⏰ Entrega: {{ t.fecha_entrega }}</div>
+                </div>
+                <div class="tarea-body">{{ t.descripcion }}</div>
+                {% if t.archivo_adjunto %}
+                    <div>
+                        <a href="{{ url_for('static', filename='uploads/' + t.archivo_adjunto) }}" target="_blank" class="file-badge">📎 Archivo del Docente: {{ t.archivo_adjunto }}</a>
+                    </div>
+                {% endif %}
+                <div style="text-align: right; margin-top: 10px;">
+                    <a href="/docente/tarea/{{ t.id_tarea }}/entregas" class="btn-grades">📥 Ver Entregas y Calificar</a>
+                    <a href="/docente/tarea/eliminar/{{ t.id_tarea }}" class="btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta tarea?')">🗑️ Eliminar</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="card" style="text-align: center; color: #94a3b8; padding: 30px;">
+                No hay tareas o prácticas asignadas para este curso todavía.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Formulario para Crear Tarea -->
+    <div>
+        <div class="card">
+            <h3>Nueva Tarea o Práctica</h3>
+            <form action="/docente/curso/{{ curso.id_curso }}/tareas" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="titulo">Título de la Actividad</label>
+                    <input type="text" id="titulo" name="titulo" required placeholder="Ej. Práctica Calificada N° 1">
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Instrucciones o Descripción</label>
+                    <textarea id="descripcion" name="descripcion" required placeholder="Detalles de la asignación..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="archivo">Adjuntar Archivo (PDF, Word, Imagen, etc.)</label>
+                    <input type="file" id="archivo" name="archivo">
+                </div>
+                <div class="form-group">
+                    <label for="fecha_entrega">Fecha Límite de Entrega</label>
+                    <input type="date" id="fecha_entrega" name="fecha_entrega" required>
+                </div>
+                <button type="submit">➕ Publicar Actividad</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

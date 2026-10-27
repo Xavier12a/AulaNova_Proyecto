@@ -1,0 +1,122 @@
+{% extends "layout.html" %}
+
+{% block title %}Control de Asistencia - AulaNova{% endblock %}
+
+{% block header_title %}Control de Asistencia - I.E. 2060 Virgen de Guadalupe{% endblock %}
+
+{% block extra_style %}
+<style>
+    .attendance-options { display: flex; gap: 16px; align-items: center; }
+    .attendance-options label { font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .attendance-options input[type="radio"] { width: 15px; height: 15px; cursor: pointer; accent-color: #0284c7; }
+
+    .header-radios { display: flex; gap: 16px; align-items: center; font-weight: normal; }
+    .header-radios label { font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .header-radios input[type="radio"] { width: 14px; height: 14px; cursor: pointer; accent-color: #0284c7; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="action-bar">
+    <form method="GET" action="/asistencia" style="display: flex; gap: 16px; align-items: center; width: 100%; flex-wrap: wrap; margin: 0;">
+        <div>
+            <label style="font-size: 12px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Grado:</label>
+            <select name="grado" onchange="this.form.submit()">
+                <option value="1ro de Secundaria" {% if grado == '1ro de Secundaria' %}selected{% endif %}>1ro de Secundaria</option>
+                <option value="2do de Secundaria" {% if grado == '2do de Secundaria' %}selected{% endif %}>2do de Secundaria</option>
+                <option value="3ro de Secundaria" {% if grado == '3ro de Secundaria' %}selected{% endif %}>3ro de Secundaria</option>
+                <option value="4to de Secundaria" {% if grado == '4to de Secundaria' %}selected{% endif %}>4to de Secundaria</option>
+                <option value="5to de Secundaria" {% if grado == '5to de Secundaria' %}selected{% endif %}>5to de Secundaria</option>
+            </select>
+        </div>
+        <div>
+            <label style="font-size: 12px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Sección:</label>
+            <select name="seccion" onchange="this.form.submit()">
+                <option value="A" {% if seccion == 'A' %}selected{% endif %}>Sección A</option>
+                <option value="B" {% if seccion == 'B' %}selected{% endif %}>Sección B</option>
+                <option value="C" {% if seccion == 'C' %}selected{% endif %}>Sección C</option>
+            </select>
+        </div>
+        <div>
+            <label style="font-size: 12px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Fecha:</label>
+            <input type="date" name="fecha" value="{{ fecha }}" onchange="this.form.submit()">
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Registro Diario de Asistencia - {{ grado }} "{{ seccion }}"</h3>
+    <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">Selecciona el estado de asistencia para cada estudiante y guarda los cambios.</p>
+    
+    <form action="/guardar-asistencia" method="POST">
+        <input type="hidden" name="fecha" value="{{ fecha }}">
+        <input type="hidden" name="grado" value="{{ grado }}">
+        <input type="hidden" name="seccion" value="{{ seccion }}">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>DNI</th>
+                    <th>Apellidos y Nombres</th>
+                    <th style="width: 440px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Marcar Asistencia</span>
+                            <div class="header-radios">
+                                <label style="color: #15803d;"><input type="radio" name="master_estado" value="Presente" onclick="marcarTodos('Presente')"> A</label>
+                                <label style="color: #a16207;"><input type="radio" name="master_estado" value="Tardanza" onclick="marcarTodos('Tardanza')"> T</label>
+                                <label style="color: #dc2626;"><input type="radio" name="master_estado" value="Ausente" onclick="marcarTodos('Ausente')"> F</label>
+                                <label style="color: #2563eb;"><input type="radio" name="master_estado" value="Tardanza Justificada" onclick="marcarTodos('Tardanza Justificada')"> TJ</label>
+                                <label style="color: #9333ea;"><input type="radio" name="master_estado" value="Falta Justificada" onclick="marcarTodos('Falta Justificada')"> FJ</label>
+                            </div>
+                        </div>
+                    </th>
+                    <th>Observaciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if alumnos %}
+                    {% for a in alumnos %}
+                    <tr>
+                        <td><strong>{{ a.dni }}</strong></td>
+                        <td>{{ a.apellidos }}, {{ a.nombres }}</td>
+                        <td>
+                            <div class="attendance-options">
+                                <label style="color: #15803d;"><input type="radio" name="estado_{{ a.id_usuario }}" value="Presente" {% if a.estado_asistencia == 'Presente' or not a.estado_asistencia %}checked{% endif %}> A</label>
+                                <label style="color: #a16207;"><input type="radio" name="estado_{{ a.id_usuario }}" value="Tardanza" {% if a.estado_asistencia == 'Tardanza' %}checked{% endif %}> T</label>
+                                <label style="color: #dc2626;"><input type="radio" name="estado_{{ a.id_usuario }}" value="Ausente" {% if a.estado_asistencia == 'Ausente' %}checked{% endif %}> F</label>
+                                <label style="color: #2563eb;"><input type="radio" name="estado_{{ a.id_usuario }}" value="Tardanza Justificada" {% if a.estado_asistencia == 'Tardanza Justificada' %}checked{% endif %}> TJ</label>
+                                <label style="color: #9333ea;"><input type="radio" name="estado_{{ a.id_usuario }}" value="Falta Justificada" {% if a.estado_asistencia == 'Falta Justificada' %}checked{% endif %}> FJ</label>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" name="observacion_{{ a.id_usuario }}" placeholder="Observación opcional" style="width: 100%;">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 25px;">No hay alumnos matriculados en este grado y sección.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        {% if alumnos %}
+        <div style="margin-top: 24px; text-align: right;">
+            <button type="submit">💾 Guardar Asistencia</button>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+<script>
+    function marcarTodos(estado) {
+        const radios = document.querySelectorAll(`input[type="radio"][value="${estado}"]`);
+        radios.forEach(radio => {
+            if (radio.name.startsWith('estado_')) {
+                radio.checked = true;
+            }
+        });
+    }
+</script>
+{% endblock %}

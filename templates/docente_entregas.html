@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+
+{% block title %}Calificar Entregas - AulaNova{% endblock %}
+
+{% block header_title %}Revisión de Tarea: {{ tarea.titulo }} ({{ tarea.nombre_curso }}){% endblock %}
+
+{% block extra_style %}
+<style>
+    .info-tarea { background: #f8fafc; padding: 16px; border-radius: 10px; border: 1.5px solid #e2e8f0; margin-bottom: 20px; }
+    input[type="number"] { width: 80px; padding: 6px; border: 1.5px solid #cbd5e1; border-radius: 6px; text-align: center; font-weight: 600; }
+    .btn-file { background: #0284c7; color: white; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; display: inline-block; }
+    .btn-file:hover { background: #0369a1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 16px;">
+    <a href="/docente/curso/{{ tarea.id_curso }}/tareas" style="background: #e2e8f0; color: #334155; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600;">⬅️ Volver a Tareas del Curso</a>
+</div>
+
+<div class="info-tarea">
+    <h3 style="font-size: 16px; color: #0f172a; margin-bottom: 6px;">📝 {{ tarea.titulo }}</h3>
+    <p style="font-size: 13px; color: #475569; margin-bottom: 4px;"><strong>Descripción:</strong> {{ tarea.descripcion }}</p>
+    <p style="font-size: 13px; color: #ef4444; font-weight: 600;">⏰ Fecha Límite: {{ tarea.fecha_entrega }}</p>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 16px;">👥 Listado de Alumnos y Trabajos Entregados</h3>
+    <form action="/docente/tarea/{{ tarea.id_tarea }}/entregas" method="POST">
+        <table>
+            <thead>
+                <tr>
+                    <th>DNI</th>
+                    <th>Apellidos y Nombres</th>
+                    <th>Estado de Entrega</th>
+                    <th>Archivo del Alumno</th>
+                    <th>Calificación (0 - 20)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ae in alumnos_entregas %}
+                <tr>
+                    <td>{{ ae.dni }}</td>
+                    <td><strong>{{ ae.apellidos }}, {{ ae.nombres }}</strong></td>
+                    <td>
+                        {% if ae.archivo_alumno %}
+                            <span style="color: #15803d; font-weight: 600; font-size: 13px;">✅ Entregado ({{ ae.fecha_entrega }})</span>
+                        {% else %}
+                            <span style="color: #dc2626; font-weight: 600; font-size: 13px;">⚠️ No entregado</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if ae.archivo_alumno %}
+                            <a href="{{ url_for('static', filename='uploads/' + ae.archivo_alumno) }}" target="_blank" class="btn-file">📥 Descargar Tarea</a>
+                        {% else %}
+                            <span style="color: #94a3b8; font-size: 12px;">Sin archivo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if ae.id_entrega %}
+                            <input type="number" step="0.5" min="0" max="20" name="nota_entrega_{{ ae.id_entrega }}" value="{{ ae.nota_tarea if ae.nota_tarea is not none else '' }}">
+                        {% else %}
+                            <span style="color: #94a3b8; font-size: 12px;">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div style="margin-top: 20px; text-align: right;">
+            <button type="submit">💾 Guardar Calificaciones</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

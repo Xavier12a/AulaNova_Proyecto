@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+
+{% block title %}Libreta Académica - AulaNova{% endblock %}
+
+{% block header_title %}Libreta Académica Institucional{% endblock %}
+
+{% block extra_style %}
+<style>
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; margin-top: 16px; }
+    th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: center; }
+    th:nth-child(1), td:nth-child(1) { text-align: left; }
+    th { color: #64748b; font-weight: 600; background: #f8fafc; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="action-bar">
+    <form method="GET" action="/libreta-academica" style="display: flex; gap: 16px; align-items: center; width: 100%; flex-wrap: wrap; margin: 0;">
+        <div>
+            <label style="font-size: 12px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Grado:</label>
+            <select name="grado" onchange="this.form.submit()">
+                <option value="1ro de Secundaria" {% if grado == '1ro de Secundaria' %}selected{% endif %}>1ro de Secundaria</option>
+                <option value="2do de Secundaria" {% if grado == '2do de Secundaria' %}selected{% endif %}>2do de Secundaria</option>
+                <option value="3ro de Secundaria" {% if grado == '3ro de Secundaria' %}selected{% endif %}>3ro de Secundaria</option>
+                <option value="4to de Secundaria" {% if grado == '4to de Secundaria' %}selected{% endif %}>4to de Secundaria</option>
+                <option value="5to de Secundaria" {% if grado == '5to de Secundaria' %}selected{% endif %}>5to de Secundaria</option>
+            </select>
+        </div>
+        <div>
+            <label style="font-size: 12px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Sección:</label>
+            <select name="seccion" onchange="this.form.submit()">
+                <option value="A" {% if seccion == 'A' %}selected{% endif %}>Sección A</option>
+                <option value="B" {% if seccion == 'B' %}selected{% endif %}>Sección B</option>
+                <option value="C" {% if seccion == 'C' %}selected{% endif %}>Sección C</option>
+            </select>
+        </div>
+        <div>
+            <label style="font-size: 12px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Seleccionar Alumno:</label>
+            <select name="id_alumno" onchange="this.form.submit()" style="min-width: 250px;">
+                <option value="" disabled selected>-- Seleccione un alumno --</option>
+                {% for a in alumnos %}
+                    <option value="{{ a.id_usuario }}" {% if id_alumno == a.id_usuario %}selected{% endif %}>{{ a.apellidos }}, {{ a.nombres }} (DNI: {{ a.dni }})</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Reporte Oficial de Notas por Periodo</h3>
+    <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">Calificaciones obtenidas en los cuatro bimestres del año escolar.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Asignatura / Curso</th>
+                <th>Bimestre 1</th>
+                <th>Bimestre 2</th>
+                <th>Bimestre 3</th>
+                <th>Bimestre 4</th>
+                <th>Promedio Anual</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if id_alumno and cursos %}
+                {% for c in cursos %}
+                <tr>
+                    <td><strong>{{ c.nombre_curso }}</strong></td>
+                    <td>{{ notas_alumno.get((c.id_curso, 'Bimestre 1'), '-') }}</td>
+                    <td>{{ notas_alumno.get((c.id_curso, 'Bimestre 2'), '-') }}</td>
+                    <td>{{ notas_alumno.get((c.id_curso, 'Bimestre 3'), '-') }}</td>
+                    <td>{{ notas_alumno.get((c.id_curso, 'Bimestre 4'), '-') }}</td>
+                    
+                    {% set ns = namespace(suma=0, count=0) %}
+                    {% for b in ['Bimestre 1', 'Bimestre 2', 'Bimestre 3', 'Bimestre 4'] %}
+                        {% if notas_alumno.get((c.id_curso, b)) is not none %}
+                            {% set ns.suma = ns.suma + notas_alumno.get((c.id_curso, b)) %}
+                            {% set ns.count = ns.count + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    <td><strong>{% if ns.count > 0 %}{{ "%.1f"|format(ns.suma / ns.count) }}{% else %}-{% endif %}</strong></td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 30px;">Selecciona un alumno para visualizar su libreta académica detallada.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

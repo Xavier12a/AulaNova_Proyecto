@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AulaNova{% endblock %}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #f4f6f9; color: #1e293b; display: flex; height: 100vh; overflow: hidden; }
+        
+        aside { width: 280px; background-color: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow-y: auto; }
+        .sidebar-brand { padding: 20px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f1f5f9; }
+        .sidebar-brand img { width: 38px; height: 38px; object-fit: contain; border-radius: 50%; }
+        .brand-text h3 { font-size: 16px; font-weight: 800; color: #0f172a; }
+        .brand-text h3 span { color: #0284c7; }
+        .brand-text span { font-size: 11px; color: #64748b; font-weight: 600; }
+        
+        .search-box-sidebar { padding: 16px; border-bottom: 1px solid #f1f5f9; }
+        .search-box-sidebar input { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #f8fafc; }
+
+        .sidebar-menu { list-style: none; padding: 12px; }
+        .menu-item { margin-bottom: 4px; border-radius: 8px; overflow: hidden; }
+        .menu-header { padding: 12px 16px; color: #475569; font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-decoration: none; transition: background 0.2s; }
+        .menu-header:hover { background-color: #f8fafc; color: #0284c7; }
+        
+        .submenu { list-style: none; background-color: #f8fafc; padding: 6px 0 6px 16px; border-left: 2px solid #0284c7; margin: 4px 0 8px 16px; display: none; }
+        .submenu.active { display: block; }
+        .submenu li a { padding: 8px 16px; display: block; font-size: 13px; color: #64748b; text-decoration: none; font-weight: 500; border-radius: 6px; transition: all 0.2s; }
+        .submenu li a:hover, .submenu li a.active { color: #0284c7; background: #e0f2fe; font-weight: 600; }
+
+        .menu-item.open .submenu { display: block; }
+        .menu-item.active-parent > .menu-header { background-color: #f0f9ff; color: #0284c7; font-weight: 700; }
+
+        main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        header { background-color: #ffffff; padding: 16px 32px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .header-title { font-size: 18px; font-weight: 700; color: #0f172a; }
+        .header-actions { display: flex; align-items: center; gap: 16px; }
+        .user-profile { font-size: 14px; font-weight: 600; color: #334155; background: #f8fafc; padding: 8px 14px; border-radius: 20px; border: 1px solid #e2e8f0; }
+        .btn-logout { background: #ef4444; color: white; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: background 0.2s; border: 1px solid #dc2626; }
+        .btn-logout:hover { background: #dc2626; }
+        
+        .content { padding: 32px; display: flex; flex-direction: column; gap: 24px; }
+        .action-bar { display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 16px 24px; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02); }
+        .card { background: #ffffff; padding: 24px; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02); }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; margin-top: 16px; }
+        th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        th { color: #64748b; font-weight: 600; background: #f8fafc; }
+        td { color: #334155; }
+        select, input { padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #f8fafc; }
+        button { padding: 10px 20px; background-color: #0f172a; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        button:hover { background-color: #1e293b; }
+        
+        {% block extra_style %}{% endblock %}
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="sidebar-brand">
+            <img src="{{ url_for('static', filename='logo_colegio.jpg') }}" alt="Logo Colegio">
+            <div class="brand-text">
+                <h3>Aula<span>Nova</span></h3>
+                <span>I.E. 2060 V. Guadalupe</span>
+            </div>
+        </div>
+
+        <div class="search-box-sidebar">
+            <input type="text" placeholder="🔍 Buscar módulo...">
+        </div>
+
+        <ul class="sidebar-menu">
+            {% if session.get('id_rol') == 1 %}
+                <li class="menu-item"><a href="/dashboard" class="menu-header">📊 Tablero</a></li>
+                <li class="menu-item"><a href="/alumnos" class="menu-header">🎓 Alumnos</a></li>
+                <li class="menu-item"><a href="/docentes" class="menu-header">👨‍🏫 Docentes</a></li>
+                <li class="menu-item"><a href="/cursos" class="menu-header">📚 Cursos y Tareas</a></li>
+                
+                <li class="menu-item {% if request.path in ['/asistencia', '/reporte-asistencia'] %}active-parent open{% endif %}">
+                    <div class="menu-header" onclick="toggleSubmenu(this)">
+                        <span>📋 Asistencia</span>
+                        <span>▼</span>
+                    </div>
+                    <ul class="submenu {% if request.path in ['/asistencia', '/reporte-asistencia'] %}active{% endif %}">
+                        <li><a href="/asistencia" class="{% if request.path == '/asistencia' %}active{% endif %}">Gestionar / Registrar</a></li>
+                        <li><a href="/reporte-asistencia" class="{% if request.path == '/reporte-asistencia' %}active{% endif %}">Reportes Consolidados</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item {% if request.path in ['/calificaciones', '/libreta-academica'] %}active-parent open{% endif %}">
+                    <div class="menu-header" onclick="toggleSubmenu(this)">
+                        <span>📈 Calificaciones</span>
+                        <span>▼</span>
+                    </div>
+                    <ul class="submenu {% if request.path in ['/calificaciones', '/libreta-academica'] %}active{% endif %}">
+                        <li><a href="/calificaciones" class="{% if request.path == '/calificaciones' %}active{% endif %}">Registro de Notas</a></li>
+                        <li><a href="/libreta-academica" class="{% if request.path == '/libreta-academica' %}active{% endif %}">Libreta Académica</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item"><a href="/comunicados" class="menu-header">🔔 Comunicados</a></li>
+
+            {% elif session.get('id_rol') == 2 %}
+                <li class="menu-item"><a href="/dashboard_docente" class="menu-header">📊 Mi Panel Docente</a></li>
+                <li class="menu-item"><a href="/comunicados" class="menu-header">🔔 Comunicados</a></li>
+
+            {% elif session.get('id_rol') == 3 %}
+                <li class="menu-item"><a href="/dashboard_estudiante" class="menu-header">📊 Mi Panel Estudiante</a></li>
+                <li class="menu-item"><a href="/comunicados" class="menu-header">🔔 Comunicados</a></li>
+            {% endif %}
+        </ul>
+    </aside>
+
+    <main>
+        <header>
+            <div class="header-title">{% block header_title %}Módulo Institucional{% endblock %}</div>
+            <div class="header-actions">
+                <div class="user-profile">👤 {{ usuario.nombres }} {{ usuario.apellidos }}</div>
+                <a href="/logout" class="btn-logout">🚪 Cerrar Sesión</a>
+            </div>
+        </header>
+
+        <div class="content">
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for message in messages %}
+                  <div style="background-color: #e0f2fe; color: #0369a1; padding: 16px; border-radius: 8px; border-left: 4px solid #0284c7; font-weight: 600; font-size: 14px;">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <script>
+        function toggleSubmenu(header) {
+            const item = header.parentElement;
+            item.classList.toggle('open');
+            const submenu = item.querySelector('.submenu');
+            submenu.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

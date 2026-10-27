@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block title %}Reporte de Asistencia - AulaNova{% endblock %}
+
+{% block header_title %}Reporte Consolidado de Asistencia - I.E. 2060 Virgen de Guadalupe{% endblock %}
+
+{% block extra_style %}
+<style>
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; margin-top: 16px; }
+    th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; text-align: center; }
+    th:nth-child(2), td:nth-child(2) { text-align: left; }
+    .badge-p { background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 12px; font-weight: 600; }
+    .badge-t { background: #fef9c3; color: #a16207; padding: 4px 8px; border-radius: 12px; font-weight: 600; }
+    .badge-f { background: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 12px; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="action-bar">
+    <form method="GET" action="/reporte-asistencia" style="display: flex; gap: 16px; align-items: center; width: 100%; flex-wrap: wrap; margin: 0;">
+        <div>
+            <label style="font-size: 12px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Grado:</label>
+            <select name="grado" onchange="this.form.submit()">
+                <option value="1ro de Secundaria" {% if grado == '1ro de Secundaria' %}selected{% endif %}>1ro de Secundaria</option>
+                <option value="2do de Secundaria" {% if grado == '2do de Secundaria' %}selected{% endif %}>2do de Secundaria</option>
+                <option value="3ro de Secundaria" {% if grado == '3ro de Secundaria' %}selected{% endif %}>3ro de Secundaria</option>
+                <option value="4to de Secundaria" {% if grado == '4to de Secundaria' %}selected{% endif %}>4to de Secundaria</option>
+                <option value="5to de Secundaria" {% if grado == '5to de Secundaria' %}selected{% endif %}>5to de Secundaria</option>
+            </select>
+        </div>
+        <div>
+            <label style="font-size: 12px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px;">Sección:</label>
+            <select name="seccion" onchange="this.form.submit()">
+                <option value="A" {% if seccion == 'A' %}selected{% endif %}>Sección A</option>
+                <option value="B" {% if seccion == 'B' %}selected{% endif %}>Sección B</option>
+                <option value="C" {% if seccion == 'C' %}selected{% endif %}>Sección C</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Consolidado Histórico - {{ grado }} "{{ seccion }}"</h3>
+    <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">Resumen total acumulado de asistencias, tardanzas y faltas por estudiante.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>DNI</th>
+                <th>Apellidos y Nombres</th>
+                <th>🟢 Presentes (A)</th>
+                <th>🟡 Tardanzas (T)</th>
+                <th>🔴 Faltas (F)</th>
+                <th>🔵 Tardanzas Just. (TJ)</th>
+                <th>🟣 Faltas Just. (FJ)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if reporte %}
+                {% for r in reporte %}
+                <tr>
+                    <td><strong>{{ r.dni }}</strong></td>
+                    <td style="text-align: left;">{{ r.apellidos }}, {{ r.nombres }}</td>
+                    <td><span class="badge-p">{{ r.total_presente }}</span></td>
+                    <td><span class="badge-t">{{ r.total_tardanza }}</span></td>
+                    <td><span class="badge-f">{{ r.total_ausente }}</span></td>
+                    <td>{{ r.total_tj }}</td>
+                    <td>{{ r.total_fj }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 25px;">No hay registros de asistencia para este grado y sección.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
